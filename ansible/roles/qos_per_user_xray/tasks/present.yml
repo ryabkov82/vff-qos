@@ -1,0 +1,11 @@
+- name: QoS | Install prerequisites
+  ansible.builtin.import_tasks: install.yml
+
+- name: QoS | Configure scripts and configs
+  ansible.builtin.import_tasks: configure.yml
+
+- name: QoS | Configure systemd
+  ansible.builtin.import_tasks: systemd.yml
+
+- name: QoS | Verify setup
+  ansible.builtin.import_tasks: verify.yml

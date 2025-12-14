@@ -1,0 +1,19 @@
+[Unit]
+Description=VFF per-user QoS follow Xray access log (conntrack mark + tc)
+Wants=network-online.target
+After=network-online.target docker.service qos-bootstrap.service
+Requires=qos-bootstrap.service
+
+[Service]
+Type=simple
+EnvironmentFile=/etc/vff-qos/qos.env
+Environment=ENV_FILE=/etc/vff-qos/qos.env
+ExecStart=/usr/local/bin/qos_follow_xray_email.sh
+Restart=always
+RestartSec=2
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

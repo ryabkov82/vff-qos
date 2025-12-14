@@ -1,0 +1,36 @@
+- name: QoS | Install required packages (common)
+  ansible.builtin.package:
+    name:
+      - nftables
+      - iproute2
+      - jq
+      - sysstat
+    state: present
+
+- name: QoS | Install conntrack package (Debian-like)
+  ansible.builtin.package:
+    name: conntrack
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: QoS | Install conntrack package (RedHat-like)
+  ansible.builtin.package:
+    name: conntrack-tools
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: QoS | Check docker CLI exists (required for docker exec)
+  ansible.builtin.command: docker version
+  register: qos_docker_check
+  changed_when: false
+  failed_when: false
+  when: qos_require_docker_cli | bool
+
+- name: QoS | Fail if docker CLI is missing
+  ansible.builtin.fail:
+    msg: >-
+      docker CLI is not available, but it is required to read Xray access log via 'docker exec'.
+      Install Docker on the host (preferred: your existing standard method) or adjust deployment to read logs without Docker.
+  when:
+    - qos_require_docker_cli | bool
+    - qos_docker_check.rc != 0

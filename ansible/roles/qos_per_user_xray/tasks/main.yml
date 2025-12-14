@@ -1,0 +1,16 @@
+- name: "QoS | Guard - invalid qos_state"
+  ansible.builtin.fail:
+    msg: "Invalid qos_state='{{ qos_state }}'. Allowed: present, disabled, absent."
+  when: qos_state not in ["present", "disabled", "absent"]
+
+- name: "QoS | Apply state: present"
+  ansible.builtin.include_tasks: present.yml
+  when: qos_state == "present"
+
+- name: "QoS | Apply state: disabled"
+  ansible.builtin.include_tasks: disabled.yml
+  when: qos_state == "disabled"
+
+- name: "QoS | Apply state: absent"
+  ansible.builtin.include_tasks: absent.yml
+  when: qos_state == "absent"

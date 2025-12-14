@@ -1,0 +1,17 @@
+{
+    "ansible.python.interpreterPath": "/bin/python3",
+    "yaml.schemas": {
+        "./.vscode/schemas/ansible.json": [
+          "ansible/**/*.yml",
+          "ansible/**/*.yaml",
+          "**/tasks/**/*.yml",
+          "**/tasks/**/*.yaml",
+          "**/handlers/**/*.yml",
+          "**/handlers/**/*.yaml",
+          "**/playbooks/**/*.yml",
+          "**/playbooks/**/*.yaml",
+          "**/roles/**/tasks/*.yml",
+          "**/roles/**/handlers/*.yml"
+        ]
+    }    
+}

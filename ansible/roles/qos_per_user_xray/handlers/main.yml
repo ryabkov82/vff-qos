@@ -1,0 +1,15 @@
+- name: Systemd | Reload daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: QoS | Reload nftables service
+  ansible.builtin.systemd:
+    name: nftables.service
+    state: reloaded
+  failed_when: false
+
+- name: QoS | Restart qos-follow service
+  ansible.builtin.systemd:
+    name: qos-follow.service
+    state: restarted
+  failed_when: false

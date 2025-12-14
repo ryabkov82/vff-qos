@@ -1,0 +1,95 @@
+- name: QoS | Stop and disable qos-follow service
+  ansible.builtin.systemd:
+    name: qos-follow.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: QoS | Stop and disable qos-bootstrap timer
+  ansible.builtin.systemd:
+    name: qos-bootstrap.timer
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: QoS | Stop and disable qos-bootstrap service (best effort)
+  ansible.builtin.systemd:
+    name: qos-bootstrap.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: QoS | Remove nftables QoS snippet
+  ansible.builtin.file:
+    path: "{{ qos_nft_snippet_path }}"
+    state: absent
+  when:
+    - qos_nft_manage | bool
+    - qos_nft_remove_on_absent | bool
+  notify: QoS | Reload nftables service
+
+- name: QoS | Remove nftables include line
+  ansible.builtin.lineinfile:
+    path: "{{ qos_nft_conf_path }}"
+    line: "{{ qos_nft_include_line }}"
+    state: absent
+  when:
+    - qos_nft_manage | bool
+    - qos_nft_remove_on_absent | bool
+  notify: QoS | Reload nftables service
+
+- name: QoS | Rollback tc/qdisc + IFB (best effort)
+  ansible.builtin.shell: |
+    set -euo pipefail
+
+    detect_wan_if() {
+      ip -4 route show default 2>/dev/null \
+        | awk '{for(i=1;i<=NF;i++) if($i=="dev"){print $(i+1); exit}}'
+    }
+
+    WAN="{{ qos_if_wan }}"
+    IFB="{{ qos_if_ifb }}"
+
+    if [[ -z "$WAN" || "$WAN" == "auto" ]]; then
+      WAN="$(detect_wan_if || true)"
+    fi
+
+    if [[ -n "${WAN:-}" ]]; then
+      tc qdisc del dev "$WAN" root 2>/dev/null || true
+      tc qdisc del dev "$WAN" ingress 2>/dev/null || true
+    fi
+    tc qdisc del dev "$IFB" root 2>/dev/null || true
+
+    ip link show "$IFB" >/dev/null 2>&1 && ip link set dev "$IFB" down || true
+    ip link show "$IFB" >/dev/null 2>&1 && ip link del "$IFB" type ifb || true
+  args:
+    executable: /bin/bash
+  register: qos_tc_rollback
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_tc_enable | bool
+    - qos_tc_rollback_on_absent | bool
+
+- name: QoS | Remove env file
+  ansible.builtin.file:
+    path: "{{ qos_etc_dir }}/qos.env"
+    state: absent
+
+- name: QoS | Remove scripts
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ qos_bin_dir }}/qos_follow_xray_email.sh"
+    - "{{ qos_bin_dir }}/qos_bootstrap_tc.sh"
+
+- name: QoS | Remove systemd unit files
+  ansible.builtin.file:
+    path: "/etc/systemd/system/{{ item }}"
+    state: absent
+  loop:
+    - "qos-follow.service"
+    - "qos-bootstrap.service"
+    - "qos-bootstrap.timer"
+  notify: Systemd | Reload daemon

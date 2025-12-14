@@ -1,0 +1,7 @@
+---
+- name: Deploy per-user QoS for Xray nodes
+  hosts: qos_nodes
+  become: true
+
+  roles:
+    - role: qos_per_user_xray

@@ -1,0 +1,61 @@
+- name: QoS | Install systemd unit files
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "/etc/systemd/system/{{ item.dest }}"
+    mode: "0644"
+  loop:
+    - name: qos-follow.service
+      src: qos-follow.service.j2
+      dest: qos-follow.service
+    - name: qos-bootstrap.service
+      src: qos-bootstrap.service.j2
+      dest: qos-bootstrap.service
+    - name: qos-bootstrap.timer
+      src: qos-bootstrap.timer.j2
+      dest: qos-bootstrap.timer
+  when: qos_systemd_enable | bool
+  notify: Systemd | Reload daemon
+
+# важно: применить daemon-reload перед любыми systemd start/enable
+- name: QoS | Reload systemd daemon now
+  ansible.builtin.meta: flush_handlers
+  when: qos_systemd_enable | bool
+
+- name: QoS | Enable nftables service
+  ansible.builtin.systemd:
+    name: nftables.service
+    enabled: true
+    state: started
+  when:
+    - qos_enable_nftables_service | bool
+    - qos_nft_manage | bool
+
+# применить tc/ifb сразу при деплое (а не ждать следующей перезагрузки)
+- name: QoS | Run bootstrap now (apply tc/ifb)
+  ansible.builtin.systemd:
+    name: qos-bootstrap.service
+    state: started
+  when:
+    - qos_systemd_enable | bool
+    - qos_tc_enable | bool
+    - qos_state == "present"
+
+- name: QoS | Enable qos-bootstrap timer
+  ansible.builtin.systemd:
+    name: qos-bootstrap.timer
+    enabled: true
+    state: started
+  when:
+    - qos_systemd_enable | bool
+    - qos_tc_enable | bool
+    - qos_state == "present"
+
+# лучше перезапускать, чтобы follower точно подхватил новый env после деплоя
+- name: QoS | Enable and restart qos-follow service
+  ansible.builtin.systemd:
+    name: qos-follow.service
+    enabled: true
+    state: restarted
+  when:
+    - qos_systemd_enable | bool
+    - qos_state == "present"

@@ -1,0 +1,14 @@
+# vff-qos include snippet
+# Copy conntrack mark -> skb fwmark so tc "fw" classifier can match it.
+
+table inet vff_qos_ctmark {
+  chain prerouting {
+    type filter hook prerouting priority mangle; policy accept;
+    meta mark set ct mark
+  }
+
+  chain output {
+    type route hook output priority mangle; policy accept;
+    meta mark set ct mark
+  }
+}

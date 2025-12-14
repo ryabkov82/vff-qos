@@ -1,0 +1,20 @@
+- name: QoS | Stop and disable qos-follow service
+  ansible.builtin.systemd:
+    name: qos-follow.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: QoS | Stop and disable qos-bootstrap timer
+  ansible.builtin.systemd:
+    name: qos-bootstrap.timer
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: QoS | Stop and disable qos-bootstrap service (best effort)
+  ansible.builtin.systemd:
+    name: qos-bootstrap.service
+    enabled: false
+    state: stopped
+  failed_when: false

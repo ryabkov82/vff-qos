@@ -1,0 +1,10 @@
+[Unit]
+Description=Run VFF QoS bootstrap at boot
+
+[Timer]
+OnBootSec={{ qos_timer_onboot_delay_sec }}s
+RandomizedDelaySec={{ qos_timer_randomized_delay_sec }}s
+Unit=qos-bootstrap.service
+
+[Install]
+WantedBy=timers.target

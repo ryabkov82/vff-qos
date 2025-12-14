@@ -1,0 +1,72 @@
+- name: QoS | Verify nftables include line present (best effort)
+  ansible.builtin.command: "grep -nE '{{ qos_nft_include_line | regex_escape() }}' {{ qos_nft_conf_path }}"
+  register: qos_nft_include_check
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_nft_manage | bool
+    - qos_state == "present"
+
+- name: QoS | Verify QoS snippet parses (best effort)
+  ansible.builtin.command: "nft -c -f {{ qos_nft_snippet_path }}"
+  register: qos_nft_snippet_check
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_nft_manage | bool
+    - qos_state == "present"
+
+- name: QoS | Verify ingress filter contains ctinfo cpmark (best effort)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    detect_wan_if() {
+      ip -4 route show default 2>/dev/null \
+        | awk '{for(i=1;i<=NF;i++) if($i=="dev"){print $(i+1); exit}}'
+    }
+
+    WAN="{{ qos_if_wan }}"
+    if [[ -z "$WAN" || "$WAN" == "auto" ]]; then
+      WAN="$(detect_wan_if || true)"
+    fi
+
+    [[ -n "${WAN:-}" ]] || exit 0
+    tc filter show dev "$WAN" parent ffff: | grep -q "ctinfo cpmark"
+  args:
+    executable: /bin/bash
+  register: qos_tc_cpmark_check
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_tc_enable | bool
+    - qos_state == "present"
+
+- name: QoS | Verify IFB qdisc exists (best effort)
+  ansible.builtin.command: "tc qdisc show dev {{ qos_if_ifb }}"
+  register: qos_tc_ifb
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_tc_enable | bool
+    - qos_state == "present"
+
+- name: QoS | Verify WAN qdisc exists (best effort)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    detect_wan_if() {
+      ip -4 route show default 2>/dev/null \
+        | awk '{for(i=1;i<=NF;i++) if($i=="dev"){print $(i+1); exit}}'
+    }
+    WAN="{{ qos_if_wan }}"
+    if [[ -z "$WAN" || "$WAN" == "auto" ]]; then
+      WAN="$(detect_wan_if || true)"
+    fi
+    [[ -n "${WAN:-}" ]] || exit 0
+    tc qdisc show dev "$WAN"
+  args:
+    executable: /bin/bash
+  register: qos_tc_wan
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_tc_enable | bool
+    - qos_state == "present"

@@ -1,0 +1,53 @@
+- name: QoS | Create required directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ qos_etc_dir }}"
+    - "{{ qos_log_dir }}"
+    - "{{ qos_state_dir }}"
+    - "{{ qos_nft_include_dir }}"
+
+- name: QoS | Render environment file
+  ansible.builtin.template:
+    src: qos.env.j2
+    dest: "{{ qos_etc_dir }}/qos.env"
+    mode: "0644"
+  notify: QoS | Restart qos-follow service
+
+- name: QoS | Install follow script (static)
+  ansible.builtin.copy:
+    src: qos_follow_xray_email.sh
+    dest: "{{ qos_bin_dir }}/qos_follow_xray_email.sh"
+    mode: "0755"
+    owner: root
+    group: root
+  notify: QoS | Restart qos-follow service
+
+- name: QoS | Install tc/ifb bootstrap script (static)
+  ansible.builtin.copy:
+    src: qos_bootstrap_tc.sh
+    dest: "{{ qos_bin_dir }}/qos_bootstrap_tc.sh"
+    mode: "0755"
+    owner: root
+    group: root
+  when: qos_tc_enable | bool
+
+- name: QoS | Render nftables QoS snippet into include dir
+  ansible.builtin.template:
+    src: nftables-include-qos-ctmark.nft.j2
+    dest: "{{ qos_nft_snippet_path }}"
+    mode: "0644"
+  when: qos_nft_manage | bool
+  notify: QoS | Reload nftables service
+
+- name: QoS | Ensure nftables.conf includes nftables.d snippets
+  ansible.builtin.lineinfile:
+    path: "{{ qos_nft_conf_path }}"
+    line: "{{ qos_nft_include_line }}"
+    insertafter: "{{ qos_nft_include_insert_after_regex }}"
+    state: present
+    create: false
+  when: qos_nft_manage | bool
+  notify: QoS | Reload nftables service

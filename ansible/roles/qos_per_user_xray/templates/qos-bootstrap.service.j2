@@ -1,0 +1,20 @@
+[Unit]
+Description=VFF QoS bootstrap tc/ifb
+Wants=network-online.target
+After=network-online.target nftables.service
+# Если на хосте nftables может быть выключен — можно убрать nftables.service из After.
+
+[Service]
+Type=oneshot
+
+# чтобы ручной запуск и сервисный запуск были одинаковыми
+EnvironmentFile=/etc/vff-qos/qos.env
+Environment=ENV_FILE=/etc/vff-qos/qos.env
+
+ExecStart=/usr/local/bin/qos_bootstrap_tc.sh
+
+# важно: для follow.service с Requires= это даст "активное" состояние после выполнения
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,69 @@
+# Role desired state:
+# - present  : install + enable QoS
+# - disabled : stop/disable QoS services (fast kill switch), keep files/snippets
+# - absent   : fully remove QoS artifacts + optional tc/nft rollback
+qos_state: "present"
+
+# Paths
+qos_bin_dir: "/usr/local/bin"
+qos_etc_dir: "/etc/vff-qos"
+qos_log_dir: "/var/log/vff-qos"
+qos_state_dir: "/run/vff-qos"
+
+# Interfaces
+# qos_if_wan:
+# - "auto": detect via IPv4 default route (recommended)
+# - "<iface>": explicit interface name (eth0/ens3/...)
+qos_if_wan: "auto"
+qos_if_ifb: "ifb0"
+
+# Xray node context (container + access log)
+qos_container: "remnanode"
+qos_xray_access_log_path: "/var/log/supervisor/xray.out.log"
+
+# Default rates if per-email mapping is not implemented
+qos_upload_default: "50mbit"
+qos_download_default: "80mbit"
+
+qos_wan_ceil: "1gbit"
+qos_tc_default_ul: "1gbit"
+qos_tc_default_dl: "1gbit"
+
+# Server-side port that Xray accepts on (outer port)
+qos_vpn_port: "443"
+
+# Dry-run mode for follow script
+qos_dry_run: "0"
+
+# nftables include model
+qos_nft_manage: true
+qos_nft_conf_path: "/etc/nftables.conf"
+qos_nft_include_dir: "/etc/nftables.d"
+qos_nft_include_glob: "/etc/nftables.d/*.nft"
+qos_nft_include_line: 'include "{{ qos_nft_include_glob }}"'
+qos_nft_include_insert_after_regex: '^flush ruleset$'
+qos_nft_snippet_path: "/etc/nftables.d/20-vff-qos-ctmark.nft"
+
+# Removal behavior (absent)
+qos_nft_remove_on_absent: true
+
+# tc/ifb bootstrap
+qos_tc_enable: true
+
+# Removal behavior (absent)
+qos_tc_rollback_on_absent: true
+
+# systemd
+qos_systemd_enable: true
+qos_timer_onboot_delay_sec: 20
+qos_timer_randomized_delay_sec: 3
+
+# Optional: ensure nftables service enabled (present)
+qos_enable_nftables_service: true
+
+# Docker management:
+# vff-qos does NOT install Docker by default (and we keep it that way).
+qos_require_docker_cli: true
+
+# HTB r2q (helps to avoid "quantum is big" warnings and improves shaping granularity)
+qos_htb_r2q: 50
