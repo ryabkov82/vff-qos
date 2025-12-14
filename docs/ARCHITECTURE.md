@@ -13,17 +13,17 @@
 
 ```mermaid
 flowchart TD
-  A[Xray access log<br/>email + src ip:port] --> B[qos_follow_xray_email.sh<br/>tail -F + разбор accepted]
-  B --> C[Вычисление mark(email)<br/>стабильный 16-бит]
-  B --> D[conntrack -U<br/>установка ct mark для TCP-сессии]
-  D --> E[(conntrack table)]
-  E --> F[nftables<br/>копирование ct mark → skb meta mark]
-  F --> G[tc filters (fw classifier)<br/>матч по skb mark]
-  G --> H1[Upload shaping<br/>WAN ingress → IFB egress<br/>HTB класс на mark]
-  G --> H2[Download shaping<br/>WAN egress<br/>HTB класс на mark]
-  H1 --> I[client → server ограничен]
-  H2 --> J[server → client ограничен]
-```
+  A["Xray access log<br/>email + src ip:port"] --> B["qos_follow_xray_email.sh<br/>tail -F + разбор accepted"]
+  B --> C["Вычисление mark(email)<br/>стабильный 16-бит"]
+  B --> D["conntrack -U<br/>установка ct mark для TCP-сессии"]
+  D --> E[("conntrack table")]
+  E --> F["nftables<br/>копирование ct mark → skb meta mark"]
+  F --> G["tc filters (fw classifier)<br/>матч по skb mark"]
+  G --> H1["Upload shaping<br/>WAN ingress → IFB egress<br/>HTB класс на mark"]
+  G --> H2["Download shaping<br/>WAN egress<br/>HTB класс на mark"]
+  H1 --> I["client → server ограничен"]
+  H2 --> J["server → client ограничен"]
+  ```
 
 ### Ключевые свойства
 
