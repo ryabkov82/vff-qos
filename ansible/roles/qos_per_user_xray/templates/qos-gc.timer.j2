@@ -1,0 +1,12 @@
+[Unit]
+Description=Run VFF QoS tc GC periodically
+
+[Timer]
+OnBootSec={{ qos_gc_timer_onboot_delay_sec }}s
+OnUnitActiveSec={{ qos_gc_timer_interval_sec }}s
+AccuracySec={{ qos_gc_timer_accuracy_sec }}s
+RandomizedDelaySec={{ qos_gc_timer_randomized_delay_sec }}s
+Persistent={{ 'true' if qos_gc_timer_persistent | bool else 'false' }}
+
+[Install]
+WantedBy=timers.target

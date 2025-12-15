@@ -1,3 +1,4 @@
+---
 - name: QoS | Stop and disable qos-follow service
   ansible.builtin.systemd:
     name: qos-follow.service
@@ -15,6 +16,14 @@
 - name: QoS | Stop and disable qos-bootstrap service (best effort)
   ansible.builtin.systemd:
     name: qos-bootstrap.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+# --- QoS GC ---
+- name: QoS | Stop and disable qos-gc timer
+  ansible.builtin.systemd:
+    name: qos-gc.timer
     enabled: false
     state: stopped
   failed_when: false
@@ -83,6 +92,7 @@
   loop:
     - "{{ qos_bin_dir }}/qos_follow_xray_email.sh"
     - "{{ qos_bin_dir }}/qos_bootstrap_tc.sh"
+    - "{{ qos_bin_dir }}/qos_gc_tc.sh"
 
 - name: QoS | Remove systemd unit files
   ansible.builtin.file:
@@ -92,4 +102,6 @@
     - "qos-follow.service"
     - "qos-bootstrap.service"
     - "qos-bootstrap.timer"
+    - "qos-gc.service"
+    - "qos-gc.timer"
   notify: Systemd | Reload daemon

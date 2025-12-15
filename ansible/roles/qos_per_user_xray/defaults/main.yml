@@ -67,3 +67,17 @@ qos_require_docker_cli: true
 
 # HTB r2q (helps to avoid "quantum is big" warnings and improves shaping granularity)
 qos_htb_r2q: 50
+
+# QoS GC (tc cleanup)
+qos_gc_enable: true
+qos_gc_idle_sec: 14400          # 4 hours
+qos_gc_min_age_sec: 600         # 10 minutes
+qos_gc_use_conntrack: false
+qos_gc_dry_run: false
+
+# QoS GC systemd timer
+qos_gc_timer_onboot_delay_sec: 120
+qos_gc_timer_interval_sec: 600
+qos_gc_timer_randomized_delay_sec: 30
+qos_gc_timer_accuracy_sec: 60
+qos_gc_timer_persistent: true

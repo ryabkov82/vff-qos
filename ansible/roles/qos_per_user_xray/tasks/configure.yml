@@ -34,6 +34,16 @@
     group: root
   when: qos_tc_enable | bool
 
+# --- QoS GC ---
+- name: QoS | Install tc GC script (static)
+  ansible.builtin.copy:
+    src: qos_gc_tc.sh
+    dest: "{{ qos_bin_dir }}/qos_gc_tc.sh"
+    mode: "0755"
+    owner: root
+    group: root
+  tags: [qos_gc]
+
 - name: QoS | Render nftables QoS snippet into include dir
   ansible.builtin.template:
     src: nftables-include-qos-ctmark.nft.j2

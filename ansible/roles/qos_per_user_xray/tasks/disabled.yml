@@ -18,3 +18,11 @@
     enabled: false
     state: stopped
   failed_when: false
+
+# --- QoS GC ---
+- name: QoS | Stop and disable qos-gc timer
+  ansible.builtin.systemd:
+    name: qos-gc.timer
+    enabled: false
+    state: stopped
+  failed_when: false

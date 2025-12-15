@@ -13,6 +13,13 @@
     - name: qos-bootstrap.timer
       src: qos-bootstrap.timer.j2
       dest: qos-bootstrap.timer
+    # --- QoS GC ---
+    - name: qos-gc.service
+      src: qos-gc.service.j2
+      dest: qos-gc.service
+    - name: qos-gc.timer
+      src: qos-gc.timer.j2
+      dest: qos-gc.timer      
   when: qos_systemd_enable | bool
   notify: Systemd | Reload daemon
 
@@ -49,6 +56,28 @@
     - qos_systemd_enable | bool
     - qos_tc_enable | bool
     - qos_state == "present"
+
+# QoS GC timer control
+- name: QoS | Enable qos-gc timer
+  ansible.builtin.systemd:
+    name: qos-gc.timer
+    enabled: true
+    state: started
+  when:
+    - qos_systemd_enable | bool
+    - qos_state == "present"
+    - qos_gc_enable | default(true) | bool
+
+- name: QoS | Stop/disable qos-gc timer when qos_gc_enable=false
+  ansible.builtin.systemd:
+    name: qos-gc.timer
+    enabled: false
+    state: stopped
+  failed_when: false
+  when:
+    - qos_systemd_enable | bool
+    - qos_state == "present"
+    - not (qos_gc_enable | default(true) | bool)
 
 # лучше перезапускать, чтобы follower точно подхватил новый env после деплоя
 - name: QoS | Enable and restart qos-follow service

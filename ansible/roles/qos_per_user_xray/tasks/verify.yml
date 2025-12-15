@@ -1,3 +1,4 @@
+---
 - name: QoS | Verify nftables include line present (best effort)
   ansible.builtin.command: "grep -nE '{{ qos_nft_include_line | regex_escape() }}' {{ qos_nft_conf_path }}"
   register: qos_nft_include_check
@@ -69,4 +70,35 @@
   failed_when: false
   when:
     - qos_tc_enable | bool
+    - qos_state == "present"
+
+# --- QoS GC verifications (best effort) ---
+- name: QoS | Verify qos-gc timer is active/enabled (best effort)
+  ansible.builtin.command: "systemctl is-active qos-gc.timer"
+  register: qos_gc_timer_active
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_systemd_enable | bool
+    - qos_state == "present"
+    - qos_gc_enable | default(true) | bool
+
+- name: QoS | Verify qos-gc timer is enabled (best effort)
+  ansible.builtin.command: "systemctl is-enabled qos-gc.timer"
+  register: qos_gc_timer_enabled
+  changed_when: false
+  failed_when: false
+  when:
+    - qos_systemd_enable | bool
+    - qos_state == "present"
+    - qos_gc_enable | default(true) | bool
+
+- name: QoS | Verify qos-gc script can run in DRY_RUN (best effort)
+  ansible.builtin.command: "{{ qos_bin_dir }}/qos_gc_tc.sh"
+  register: qos_gc_dryrun_exec
+  changed_when: false
+  failed_when: false
+  environment:
+    QOS_GC_DRY_RUN: "1"
+  when:
     - qos_state == "present"

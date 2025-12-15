@@ -1,0 +1,9 @@
+[Unit]
+Description=VFF QoS per-user tc GC (HTB classes + fw filters)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=-{{ qos_etc_dir }}/qos.env
+ExecStart={{ qos_bin_dir }}/qos_gc_tc.sh
