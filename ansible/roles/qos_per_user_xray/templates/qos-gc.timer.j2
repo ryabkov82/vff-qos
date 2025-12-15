@@ -2,11 +2,19 @@
 Description=Run VFF QoS tc GC periodically
 
 [Timer]
-OnBootSec={{ qos_gc_timer_onboot_delay_sec }}s
-OnUnitActiveSec={{ qos_gc_timer_interval_sec }}s
-AccuracySec={{ qos_gc_timer_accuracy_sec }}s
-RandomizedDelaySec={{ qos_gc_timer_randomized_delay_sec }}s
-Persistent={{ 'true' if qos_gc_timer_persistent | bool else 'false' }}
+# Run once per day
+OnCalendar=daily
+
+# Add jitter to avoid synchronized load spikes (systemd will delay start randomly)
+RandomizedDelaySec=1h
+
+# Ensure missed runs execute soon after boot (if the machine was down at schedule time)
+Persistent=true
+
+# Accuracy is not critical for daily jobs; relax wakeups
+AccuracySec=5min
+
+Unit=qos-gc.service
 
 [Install]
 WantedBy=timers.target

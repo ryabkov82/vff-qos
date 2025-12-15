@@ -1,4 +1,10 @@
 # vff-qos
+![License](https://img.shields.io/badge/license-MIT-2AAEE8?style=flat-square)
+![Linux](https://img.shields.io/badge/platform-Linux-2AAEE8?style=flat-square)
+![Ansible](https://img.shields.io/badge/automation-Ansible-6F42C1?style=flat-square)
+![systemd](https://img.shields.io/badge/runtime-systemd-6F42C1?style=flat-square)
+![QoS](https://img.shields.io/badge/qos-tc%2Fifb%20HTB-2AAEE8?style=flat-square)
+![Xray](https://img.shields.io/badge/xray-supported-6F42C1?style=flat-square)
 
 Infrastructure-level **per-user traffic shaping (QoS)** for VPN/Xray nodes.  
 Designed as an independent, reusable component of the **VPN for Friends (VFF)** ecosystem.
@@ -44,7 +50,7 @@ QoS **не привязан логически к Remnawave** и может ис
 - **никогда не затрагивает активных пользователей**.
 
 **Класс удаляется, если:**
-- существует дольше `QOS_GC_MIN_AGE_SEC` (по умолчанию 10 минут);
+- существует дольше `QOS_GC_MIN_AGE_SEC` (защитный интервал после создания класса);
 - нет трафика дольше `QOS_GC_IDLE_SEC` (по умолчанию 4 часа);
 - *(опционально)* нет активных conntrack-сессий с этим mark.
 
@@ -85,6 +91,14 @@ tc fw classifier
 
 📘 **Подробнее об архитектуре и потоках данных** см. в  
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+
+---
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [QoS Garbage Collection (tc GC)](docs/QOS_GC.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
 
 ---
 
