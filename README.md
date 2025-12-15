@@ -106,16 +106,23 @@ tc fw classifier
 
 ```
 vff-qos/
-  ansible/
-    roles/
-      qos_per_user_xray/
-  tools/
-    qos_cpu_capture.sh
-  docs/
-    ARCHITECTURE.md
-    QOS_GC.md
-    TROUBLESHOOTING.md
-  README.md
+├─ roles/
+│ └─ qos_per_user_xray/ # Ansible role (installable via ansible-galaxy)
+│
+├─ ansible/
+│ ├─ playbooks/
+│ ├─ inventory/
+│ └─ ansible.cfg
+│
+├─ tools/
+│ └─ qos_cpu_capture.sh
+│
+├─ docs/
+│ ├─ ARCHITECTURE.md
+│ ├─ QOS_GC.md
+│ └─ TROUBLESHOOTING.md
+│
+└─ README.md
 ```
 
 ---
