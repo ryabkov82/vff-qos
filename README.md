@@ -220,7 +220,7 @@ Pull request’ы приветствуются:
 
 ---
 
-## 🤝 Автор
+## 👤 Автор
 
 **Sergey Ryabkov**  
 GitHub: [@ryabkov82](https://github.com/ryabkov82)
