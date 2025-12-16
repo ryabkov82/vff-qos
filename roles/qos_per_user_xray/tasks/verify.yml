@@ -74,7 +74,7 @@
 
 # --- QoS GC verifications (best effort) ---
 - name: QoS | Verify qos-gc timer is active/enabled (best effort)
-  ansible.builtin.command: "systemctl is-active qos-gc.timer"
+  ansible.builtin.command: "systemctl is-active qos-gc.timer" # noqa command-instead-of-module
   register: qos_gc_timer_active
   changed_when: false
   failed_when: false
@@ -84,7 +84,7 @@
     - qos_gc_enable | default(true) | bool
 
 - name: QoS | Verify qos-gc timer is enabled (best effort)
-  ansible.builtin.command: "systemctl is-enabled qos-gc.timer"
+  ansible.builtin.command: "systemctl is-enabled qos-gc.timer" # noqa command-instead-of-module
   register: qos_gc_timer_enabled
   changed_when: false
   failed_when: false

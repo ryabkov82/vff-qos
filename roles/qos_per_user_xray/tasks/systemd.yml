@@ -19,7 +19,7 @@
       dest: qos-gc.service
     - name: qos-gc.timer
       src: qos-gc.timer.j2
-      dest: qos-gc.timer      
+      dest: qos-gc.timer
   when: qos_systemd_enable | bool
   notify: Systemd | Reload daemon
 
