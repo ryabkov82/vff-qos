@@ -75,9 +75,8 @@ qos_gc_min_age_sec: 600         # 10 minutes
 qos_gc_use_conntrack: true
 qos_gc_dry_run: false
 
-# QoS GC systemd timer
-qos_gc_timer_onboot_delay_sec: 120
-qos_gc_timer_interval_sec: 600
-qos_gc_timer_randomized_delay_sec: 30
-qos_gc_timer_accuracy_sec: 60
+# QoS GC systemd timer (calendar-based)
+qos_gc_timer_calendar: "daily"
+qos_gc_timer_randomized_delay_sec: "1h"
 qos_gc_timer_persistent: true
+qos_gc_timer_accuracy_sec: "5min"
