@@ -20,6 +20,10 @@
     - name: qos-gc.timer
       src: qos-gc.timer.j2
       dest: qos-gc.timer
+    # --- nft runtime persistence ---
+    - name: vff-qos-nft.service
+      src: vff-qos-nft.service.j2
+      dest: vff-qos-nft.service
   when: qos_systemd_enable | bool
   notify: Systemd | Reload daemon
 
@@ -28,13 +32,14 @@
   ansible.builtin.meta: flush_handlers
   when: qos_systemd_enable | bool
 
-- name: QoS | Enable nftables service
+- name: QoS | Enable and start vff-qos-nft service
   ansible.builtin.systemd:
-    name: nftables.service
+    name: vff-qos-nft.service
     enabled: true
     state: started
   when:
-    - qos_enable_nftables_service | bool
+    - qos_systemd_enable | bool
+    - qos_state == "present"
     - qos_nft_manage | bool
 
 # применить tc/ifb сразу при деплое (а не ждать следующей перезагрузки)

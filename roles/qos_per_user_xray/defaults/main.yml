@@ -35,14 +35,39 @@ qos_vpn_port: "443"
 # Dry-run mode for follow script
 qos_dry_run: "0"
 
-# nftables include model
+# nftables runtime QoS model (Docker-safe)
+
+# Управляет ли роль nft-правилами для QoS
 qos_nft_manage: true
-qos_nft_conf_path: "/etc/nftables.conf"
-qos_nft_include_dir: "/etc/nftables.d"
-qos_nft_include_glob: "/etc/nftables.d/*.nft"
-qos_nft_include_line: 'include "{{ qos_nft_include_glob }}"'
-qos_nft_include_insert_after_regex: '^flush ruleset$'
-qos_nft_snippet_path: "/etc/nftables.d/20-vff-qos-ctmark.nft"
+
+# nft table / chains used for ctmark -> fwmark
+qos_nft_table_family: "inet"
+qos_nft_table_name: "vff_qos_ctmark"
+
+qos_nft_chain_prerouting: "prerouting"
+qos_nft_chain_output: "output"
+
+# Reference-only snippet (не применяется через nftables.service)
+qos_nft_snippet_path: "/etc/nftables.d/50-vff-qos-ctmark.nft"
+
+# Runtime apply script
+qos_nft_apply_script_path: "/usr/local/sbin/vff-qos-nft-apply.sh"
+
+# systemd unit for restoring rules after reboot
+qos_nft_unit_name: "vff-qos-nft"
+qos_nft_unit_path: "/etc/systemd/system/{{ qos_nft_unit_name }}.service"
+
+# systemd ordering (важно для Docker)
+qos_nft_unit_after:
+  - "network-online.target"
+  - "docker.service"
+
+qos_nft_unit_wants:
+  - "network-online.target"
+
+# Persistence behavior
+qos_nft_unit_enable: true
+qos_nft_unit_start: true
 
 # Removal behavior (absent)
 qos_nft_remove_on_absent: true
@@ -57,9 +82,6 @@ qos_tc_rollback_on_absent: true
 qos_systemd_enable: true
 qos_timer_onboot_delay_sec: 20
 qos_timer_randomized_delay_sec: 3
-
-# Optional: ensure nftables service enabled (present)
-qos_enable_nftables_service: true
 
 # Docker management:
 # vff-qos does NOT install Docker by default (and we keep it that way).

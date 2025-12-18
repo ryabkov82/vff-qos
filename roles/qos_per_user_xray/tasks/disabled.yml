@@ -19,6 +19,13 @@
     state: stopped
   failed_when: false
 
+- name: QoS | Stop and disable vff-qos-nft service
+  ansible.builtin.systemd:
+    name: vff-qos-nft.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
 # --- QoS GC ---
 - name: QoS | Stop and disable qos-gc timer
   ansible.builtin.systemd:

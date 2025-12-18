@@ -1,0 +1,22 @@
+[Unit]
+Description=VFF QoS nftables runtime rules (ct mark -> skb mark)
+After={{ qos_nft_unit_after | join(' ') }}
+Wants={{ qos_nft_unit_wants | join(' ') }}
+
+[Service]
+Type=oneshot
+
+# Parameters for /usr/local/sbin/vff-qos-nft-apply.sh
+Environment=QOS_NFT_FAMILY={{ qos_nft_table_family }}
+Environment=QOS_NFT_TABLE={{ qos_nft_table_name }}
+Environment=QOS_NFT_CHAIN_PRE={{ qos_nft_chain_prerouting }}
+Environment=QOS_NFT_CHAIN_OUT={{ qos_nft_chain_output }}
+
+# Optional override (normally not needed)
+Environment=NFT=/usr/sbin/nft
+
+ExecStart={{ qos_nft_apply_script_path }}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

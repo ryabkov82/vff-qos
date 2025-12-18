@@ -28,24 +28,36 @@
     state: stopped
   failed_when: false
 
-- name: QoS | Remove nftables QoS snippet
+- name: QoS | Stop and disable vff-qos-nft service
+  ansible.builtin.systemd:
+    name: vff-qos-nft.service
+    enabled: false
+    state: stopped
+  failed_when: false
+
+- name: QoS | Remove nft runtime apply script
+  ansible.builtin.file:
+    path: "{{ qos_nft_apply_script_path }}"
+    state: absent
+  when:
+    - qos_nft_manage | bool
+    - qos_nft_remove_on_absent | bool
+
+- name: QoS | Remove nftables QoS reference snippet
   ansible.builtin.file:
     path: "{{ qos_nft_snippet_path }}"
     state: absent
   when:
     - qos_nft_manage | bool
     - qos_nft_remove_on_absent | bool
-  notify: QoS | Reload nftables service
 
-- name: QoS | Remove nftables include line
-  ansible.builtin.lineinfile:
-    path: "{{ qos_nft_conf_path }}"
-    line: "{{ qos_nft_include_line }}"
-    state: absent
+- name: QoS | Remove nft table (only our table; best effort)
+  ansible.builtin.command: "nft delete table {{ qos_nft_table_family }} {{ qos_nft_table_name }}"
+  changed_when: false
+  failed_when: false
   when:
     - qos_nft_manage | bool
     - qos_nft_remove_on_absent | bool
-  notify: QoS | Reload nftables service
 
 - name: QoS | Rollback tc/qdisc + IFB (best effort)
   ansible.builtin.shell: |
@@ -104,4 +116,5 @@
     - "qos-bootstrap.timer"
     - "qos-gc.service"
     - "qos-gc.timer"
+    - "vff-qos-nft.service"
   notify: Systemd | Reload daemon
